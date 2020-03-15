@@ -1,0 +1,22 @@
+/* line 1, src/scss/components/button.scss */
+.big_button {
+  background-color: green;
+}
+/* line 3, src/scss/components/button.scss */
+.big_button-text {
+  -webkit-transform: scale(0.7);
+  transform: scale(0.7);
+  color: blue;
+}
+
+/* line 3, src/scss/pages/myPage/index.scss */
+.box {
+  display: -webkit-box;
+  display: -ms-flexbox;
+  display: flex;
+}
+/* line 5, src/scss/pages/myPage/index.scss */
+.box_inner {
+  background-color: bisque;
+  height: 112px;
+}

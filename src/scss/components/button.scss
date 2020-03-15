@@ -1,0 +1,7 @@
+.big_button {
+  background-color: green;
+  &-text {
+    transform: scale(0.7);
+    color: blue;
+  }
+}

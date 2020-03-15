@@ -1,0 +1,9 @@
+@import 'src/scss/components/button';
+
+.sub {
+  display: flex;
+  &_inner {
+    background-color: bisque;
+    height: 12px;
+  }
+}
