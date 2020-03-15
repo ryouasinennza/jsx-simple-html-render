@@ -5,7 +5,7 @@ export const Main = () => {
     <main className="box">
       <div className="box_inner">
         <button className="big_button">
-          <a className="big_button-text">BUTo</a>
+          <a className="big_button-text">BUTLLaaasss</a>
         </button>
       </div>
     </main>

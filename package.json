@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "babel-node lib/server.js",
-    "html": "babel-node lib/html-build.js"
+    "start": "babel-node lib/js-build.js && babel-node lib/server.js",
+    "html": ""
   },
   "author": "",
   "license": "ISC",

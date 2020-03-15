@@ -1,5 +1,5 @@
 import axios from 'axios'
-axios.get('/user?ID=12345')
+axios.get('/user?ID=1')
   .then(function (response) {
     // handle success
     console.log(response);
