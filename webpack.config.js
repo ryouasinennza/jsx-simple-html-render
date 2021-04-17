@@ -1,10 +1,13 @@
 const root = require('app-root-path')
-const ConvertJSXToHTML = require('./dist/ConvertJSXToHTML')
+const ConvertJSXToHTML = require('./dist/index')
 const isDevEnv = process.env.NODE_ENV === 'development'
 
 module.exports = {
   mode: process.env.NODE_ENV,
-  watch: isDevEnv,
+  devServer: {
+    contentBase: `${root}/example-dist`,
+    watchContentBase: true
+  },
   devtool: false,
   entry: './example-src/js/index.js',
   output: {
@@ -24,11 +27,17 @@ module.exports = {
   },
   plugins: [
     new ConvertJSXToHTML({
-      src: 'example-src/jsx',
-      dist: 'example-dist',
-      output: 'example-dist/html',
+      dev: isDevEnv,
       watch: isDevEnv,
-      dev: isDevEnv
+      src: 'example-src/jsx',
+      relativeRoot: 'example-dist',
+      output: 'example-dist',
+      replace: [
+        {
+          regexp: /<!-- replace -->/,
+          value: 'hello'
+        }
+      ]
     })
   ]
 }

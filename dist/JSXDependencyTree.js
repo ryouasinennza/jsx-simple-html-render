@@ -12,24 +12,24 @@ function _defineProperties(target, props) { for (var i = 0; i < props.length; i+
 
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
 
-var fs = require('fs-extra');
-
 var chalk = require('chalk');
 
 var cliProgress = require('cli-progress');
 
 var dependencyTree = require('dependency-tree');
 
-module.exports.JSXDependencyTree = /*#__PURE__*/function () {
-  function _class(JSXDirectory) {
-    _classCallCheck(this, _class);
+var fs = require('fs-extra');
+
+var JSXDependencyTree = /*#__PURE__*/function () {
+  function JSXDependencyTree(JSXDirectory) {
+    _classCallCheck(this, JSXDependencyTree);
 
     this.tree = {};
     this.JSXDirectory = JSXDirectory;
     this.setTreeAll();
   }
 
-  _createClass(_class, [{
+  _createClass(JSXDependencyTree, [{
     key: "setTree",
     value: function setTree(targetPath) {
       if (targetPath.match(/\.jsx$/) && !this.tree[targetPath]) {
@@ -136,5 +136,7 @@ module.exports.JSXDependencyTree = /*#__PURE__*/function () {
     }
   }]);
 
-  return _class;
+  return JSXDependencyTree;
 }();
+
+module.exports = JSXDependencyTree;

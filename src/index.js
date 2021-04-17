@@ -1,17 +1,19 @@
 require('@babel/register')
-const fs = require('fs-extra')
 const chalk = require('chalk')
-const { JSXDependencyTree } = require('./JSXDependencyTree')
-const Hook = require('console-hook')
 const chokidar = require('chokidar')
+const fs = require('fs-extra')
+const Hook = require('console-hook')
 const root = require('app-root-path')
+const replaceList = require('./replaceList')
+const JSXDependencyTree = require('./JSXDependencyTree')
 
-class ConvertJSXToHTML {
-  constructor({ src, dist, output, watch, dev }) {
+class JsxSimpleHtmlRender {
+  constructor({ dev, watch, src, relativeRoot, output, replace = [] }) {
     this.dev = dev
     this.src = this.makePath(src)
-    this.dist = dist
+    this.relativeRoot = relativeRoot
     this.output = this.makePath(output)
+    this.replace = replace
     this.DTI = new JSXDependencyTree(this.src)
     this.exportHTML(this.DTI.tree)
 
@@ -66,7 +68,7 @@ class ConvertJSXToHTML {
 
   getRelativePath(targetPath) {
     const pathArray = targetPath.split('/')
-    const pathLength = pathArray.length - pathArray.indexOf(this.dist) - 1
+    const pathLength = pathArray.length - pathArray.indexOf(this.relativeRoot) - 1
     let relativePath = ''
     if (pathLength === 1) return relativePath
     for (let i = 1; i < pathLength; i++) {
@@ -94,21 +96,7 @@ class ConvertJSXToHTML {
       const JSX = require(targetPath)
       const htmlMin = `<!DOCTYPE html>${ReactDOMServer.renderToStaticMarkup(JSX.default({ relativePath }))}`
       errorHook.detach()
-      return htmlMin
-        .replace(/&lt;/g, '<')
-        .replace(/&gt;/g, '>')
-        .replace(/&amp;/g, '&')
-        .replace(/charSet=/g, 'charset=')
-        .replace(/frameBorder=/g, 'frameborder=')
-        .replace(/replaceonclick/g, 'onclick')
-        .replace(/replacehistory/g, 'href')
-        .replace(/hrefLang/g, 'hreflang')
-        .replace(/colSpan/g, 'colspan')
-        .replace(/&#x27;/g, "'")
-        .replace(/replacechecked/g, 'checked')
-        .replace(/replacedataytid/g, 'data-ytMovieId')
-        .replace(/replacedatayttype/g, 'data-ytMovieType')
-        .replace(/async=""/g, 'async')
+      return this.codeReplace(htmlMin)
     } catch (e) {
       console.log('\n', e)
       if (this.dev) {
@@ -120,7 +108,16 @@ class ConvertJSXToHTML {
     }
   }
 
+  codeReplace(htmlCode) {
+    let code = htmlCode
+    const replace = this.replace.length === 0 ? replaceList : [...replaceList, ...this.replace]
+    for (let i = 0; i < replace.length; i++) {
+      code = code.replace(replace[i].regexp, replace[i].value)
+    }
+    return code
+  }
+
   apply(compiler) {}
 }
 
-module.exports = ConvertJSXToHTML
+module.exports = JsxSimpleHtmlRender
