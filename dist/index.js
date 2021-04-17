@@ -1,5 +1,13 @@
 "use strict";
 
+function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _unsupportedIterableToArray(arr) || _nonIterableSpread(); }
+
+function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
+
+function _iterableToArray(iter) { if (typeof Symbol !== "undefined" && Symbol.iterator in Object(iter)) return Array.from(iter); }
+
+function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) return _arrayLikeToArray(arr); }
+
 function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
 
 function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
@@ -20,33 +28,37 @@ function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _d
 
 require('@babel/register');
 
-var fs = require('fs-extra');
-
 var chalk = require('chalk');
-
-var _require = require('./JSXDependencyTree'),
-    JSXDependencyTree = _require.JSXDependencyTree;
-
-var Hook = require('console-hook');
 
 var chokidar = require('chokidar');
 
+var fs = require('fs-extra');
+
+var Hook = require('console-hook');
+
 var root = require('app-root-path');
 
-var ConvertJSXToHTML = /*#__PURE__*/function () {
-  function ConvertJSXToHTML(_ref) {
-    var src = _ref.src,
-        dist = _ref.dist,
-        output = _ref.output,
-        watch = _ref.watch,
-        dev = _ref.dev;
+var JSXDependencyTree = require('./JSXDependencyTree');
 
-    _classCallCheck(this, ConvertJSXToHTML);
+var replaceList = require('./replaceList');
+
+var JsxSimpleHtmlRender = /*#__PURE__*/function () {
+  function JsxSimpleHtmlRender(_ref) {
+    var dev = _ref.dev,
+        watch = _ref.watch,
+        src = _ref.src,
+        relativeRoot = _ref.relativeRoot,
+        output = _ref.output,
+        _ref$replace = _ref.replace,
+        replace = _ref$replace === void 0 ? [] : _ref$replace;
+
+    _classCallCheck(this, JsxSimpleHtmlRender);
 
     this.dev = dev;
     this.src = this.makePath(src);
-    this.dist = dist;
+    this.relativeRoot = relativeRoot;
     this.output = this.makePath(output);
+    this.replace = replace;
     this.DTI = new JSXDependencyTree(this.src);
     this.exportHTML(this.DTI.tree);
 
@@ -55,7 +67,7 @@ var ConvertJSXToHTML = /*#__PURE__*/function () {
     }
   }
 
-  _createClass(ConvertJSXToHTML, [{
+  _createClass(JsxSimpleHtmlRender, [{
     key: "watch",
     value: function watch() {
       var _this = this;
@@ -112,7 +124,7 @@ var ConvertJSXToHTML = /*#__PURE__*/function () {
     key: "getRelativePath",
     value: function getRelativePath(targetPath) {
       var pathArray = targetPath.split('/');
-      var pathLength = pathArray.length - pathArray.indexOf(this.dist) - 1;
+      var pathLength = pathArray.length - pathArray.indexOf(this.relativeRoot) - 1;
       var relativePath = '';
       if (pathLength === 1) return relativePath;
 
@@ -153,7 +165,7 @@ var ConvertJSXToHTML = /*#__PURE__*/function () {
           relativePath: relativePath
         })));
         errorHook.detach();
-        return htmlMin.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&').replace(/charSet=/g, 'charset=').replace(/frameBorder=/g, 'frameborder=').replace(/replaceonclick/g, 'onclick').replace(/replacehistory/g, 'href').replace(/hrefLang/g, 'hreflang').replace(/colSpan/g, 'colspan').replace(/&#x27;/g, "'").replace(/replacechecked/g, 'checked').replace(/replacedataytid/g, 'data-ytMovieId').replace(/replacedatayttype/g, 'data-ytMovieType').replace(/async=""/g, 'async');
+        return this.codeReplace(htmlMin);
       } catch (e) {
         console.log('\n', e);
 
@@ -167,11 +179,23 @@ var ConvertJSXToHTML = /*#__PURE__*/function () {
       }
     }
   }, {
+    key: "codeReplace",
+    value: function codeReplace(htmlCode) {
+      var code = htmlCode;
+      var replace = this.replace.length === 0 ? replaceList : [].concat(_toConsumableArray(replaceList), _toConsumableArray(this.replace));
+
+      for (var i = 0; i < replace.length; i++) {
+        code = code.replace(replace[i].regexp, replace[i].value);
+      }
+
+      return code;
+    }
+  }, {
     key: "apply",
     value: function apply(compiler) {}
   }]);
 
-  return ConvertJSXToHTML;
+  return JsxSimpleHtmlRender;
 }();
 
-module.exports = ConvertJSXToHTML;
+module.exports = JsxSimpleHtmlRender;

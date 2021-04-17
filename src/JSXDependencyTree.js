@@ -1,9 +1,9 @@
-const fs = require('fs-extra')
 const chalk = require('chalk')
 const cliProgress = require('cli-progress')
 const dependencyTree = require('dependency-tree')
+const fs = require('fs-extra')
 
-module.exports.JSXDependencyTree = class {
+class JSXDependencyTree {
   constructor(JSXDirectory) {
     this.tree = {}
     this.JSXDirectory = JSXDirectory
@@ -100,3 +100,5 @@ module.exports.JSXDependencyTree = class {
     }
   }
 }
+
+module.exports = JSXDependencyTree
