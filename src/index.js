@@ -8,8 +8,8 @@ const replaceList = require('./replaceList')
 const JSXDependencyTree = require('./JSXDependencyTree')
 
 class JsxSimpleHtmlRender {
-  constructor({ dev, watch, src, relativeRoot, output, replace = [] }) {
-    this.dev = dev
+  constructor({ throwFlag, watch, src, relativeRoot, output, replace = [] }) {
+    this.throwFlag = throwFlag
     this.src = this.makePath(src)
     this.relativeRoot = relativeRoot
     this.output = this.makePath(output)
@@ -99,10 +99,10 @@ class JsxSimpleHtmlRender {
       return this.codeReplace(htmlMin)
     } catch (e) {
       console.log('\n', e)
-      if (this.dev) {
-        return 'Error'
+      if (this.throwFlag) {
+        throw ''
       }
-      throw ''
+      return 'Error'
     } finally {
       process.env.NODE_ENV = env
     }

@@ -38,13 +38,13 @@ var Hook = require('console-hook');
 
 var root = require('app-root-path');
 
-var JSXDependencyTree = require('./JSXDependencyTree');
-
 var replaceList = require('./replaceList');
+
+var JSXDependencyTree = require('./JSXDependencyTree');
 
 var JsxSimpleHtmlRender = /*#__PURE__*/function () {
   function JsxSimpleHtmlRender(_ref) {
-    var dev = _ref.dev,
+    var throwFlag = _ref.throwFlag,
         watch = _ref.watch,
         src = _ref.src,
         relativeRoot = _ref.relativeRoot,
@@ -54,7 +54,7 @@ var JsxSimpleHtmlRender = /*#__PURE__*/function () {
 
     _classCallCheck(this, JsxSimpleHtmlRender);
 
-    this.dev = dev;
+    this.throwFlag = throwFlag;
     this.src = this.makePath(src);
     this.relativeRoot = relativeRoot;
     this.output = this.makePath(output);
@@ -169,11 +169,11 @@ var JsxSimpleHtmlRender = /*#__PURE__*/function () {
       } catch (e) {
         console.log('\n', e);
 
-        if (this.dev) {
-          return 'Error';
+        if (this.throwFlag) {
+          throw '';
         }
 
-        throw '';
+        return 'Error';
       } finally {
         process.env.NODE_ENV = env;
       }
