@@ -11,11 +11,11 @@ npm i -D jsx-simple-html-render
 **webpack.config.js**
 
 ```javascript
-const ConvertJSXToHTML = require('./dist/index')
+const JsxSimpleHtmlRender = require('jsx-simple-html-render')
   
 // ...
 plugins: [
-    new ConvertJSXToHTML({
+    new JsxSimpleHtmlRender({
       throwFlag: false, // true if you want to throw with react error
       watch: true, // Hot reload
       src: 'src/jsx',// JSX source dir
