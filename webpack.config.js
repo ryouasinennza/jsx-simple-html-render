@@ -1,5 +1,5 @@
 const root = require('app-root-path')
-const ConvertJSXToHTML = require('./dist/index')
+const JsxSimpleHtmlRender = require('./dist/index')
 const isDevEnv = process.env.NODE_ENV === 'development'
 
 module.exports = {
@@ -26,7 +26,7 @@ module.exports = {
     ]
   },
   plugins: [
-    new ConvertJSXToHTML({
+    new JsxSimpleHtmlRender({
       throwFlag: !isDevEnv,
       watch: isDevEnv,
       src: 'example-src/jsx',
