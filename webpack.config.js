@@ -27,7 +27,7 @@ module.exports = {
   },
   plugins: [
     new ConvertJSXToHTML({
-      dev: isDevEnv,
+      throwFlag: !isDevEnv,
       watch: isDevEnv,
       src: 'example-src/jsx',
       relativeRoot: 'example-dist',
