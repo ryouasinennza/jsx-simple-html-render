@@ -1,7 +1,7 @@
-const fs = require('fs-extra')
 const chalk = require('chalk')
 const cliProgress = require('cli-progress')
 const dependencyTree = require('dependency-tree')
+const getJSXFilePaths = require('./getJSXFilePaths')
 
 class JSXDependencyTree {
   constructor(JSXDirectory) {
@@ -19,34 +19,14 @@ class JSXDependencyTree {
 
   setTreeAll() {
     console.log(chalk.yellow('> set JSX dependency tree'))
-    this.JSXpaths = this.getJSXFilePaths(this.JSXDirectory)
+    const JSXPaths = getJSXFilePaths(this.JSXDirectory, false)
     const bar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic)
-    bar.start(this.JSXpaths.length, 1)
-    for (let i = 0; i < this.JSXpaths.length; i++) {
-      this.tree[this.JSXpaths[i]] = this.getDependencyTree(this.JSXpaths[i])
+    bar.start(JSXPaths.length, 1)
+    for (let i = 0; i < JSXPaths.length; i++) {
+      this.tree[JSXPaths[i]] = this.getDependencyTree(JSXPaths[i])
       bar.update(i + 1)
     }
     bar.stop()
-  }
-
-  getJSXFilePaths(root) {
-    const files = []
-    const readDir = (dirArray, prefix) => {
-      prefix = prefix ? `${prefix}/` : ''
-      for (let i = 0; i < dirArray.length; i++) {
-        if (!!dirArray[i].match(/\.(js|jsx)$/)) {
-          if (dirArray[i].match(/\.jsx$/)) {
-            files.push(`${root}${prefix}${dirArray[i]}`)
-          }
-        } else {
-          const recursionDir = fs.readdirSync(`${root}${prefix}${dirArray[i]}`)
-          readDir(recursionDir, `${prefix}${dirArray[i]}`)
-        }
-      }
-    }
-    readDir(fs.readdirSync(root), false)
-
-    return files
   }
 
   getDependencyTree(filename) {

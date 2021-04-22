@@ -1,6 +1,6 @@
 {
   "name": "jsx-simple-html-render",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "simple html render",
   "main": "./dist/index.js",
   "scripts": {

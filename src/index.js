@@ -1,10 +1,11 @@
 require('@babel/register')
-const fs = require('fs-extra')
 const chalk = require('chalk')
+const fsExtra = require('fs-extra')
 const chokidar = require('chokidar')
 const Hook = require('console-hook')
 const root = require('app-root-path')
 const replaceList = require('./replaceList')
+const getJSXFilePaths = require('./getJSXFilePaths')
 const JSXDependencyTree = require('./JSXDependencyTree')
 
 class JsxSimpleHtmlRender {
@@ -14,11 +15,12 @@ class JsxSimpleHtmlRender {
     this.relativeRoot = relativeRoot
     this.src = this.makePath(src)
     this.output = this.makePath(output)
-    this.DTI = new JSXDependencyTree(this.src)
-    this.exportHTML(this.DTI.tree)
-
     if (watch) {
+      this.DTI = new JSXDependencyTree(this.src)
+      this.exportHTML(this.DTI.tree)
       this.watch()
+    } else {
+      this.exportHTML(getJSXFilePaths(this.src, true))
     }
   }
 
@@ -64,7 +66,10 @@ class JsxSimpleHtmlRender {
     for (const jsxPath in fileNames) {
       if (fileNames.hasOwnProperty(jsxPath)) {
         const outputPath = this.getOutputPath(jsxPath)
-        fs.outputFileSync(outputPath, this.getHTML(renderToStaticMarkup, jsxPath, this.getRelativePath(outputPath)))
+        fsExtra.outputFileSync(
+          outputPath,
+          this.getHTML(renderToStaticMarkup, jsxPath, this.getRelativePath(outputPath))
+        )
       }
     }
     errorHook.detach()
