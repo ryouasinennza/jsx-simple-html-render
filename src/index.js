@@ -1,7 +1,7 @@
 require('@babel/register')
+const fs = require('fs-extra')
 const chalk = require('chalk')
 const chokidar = require('chokidar')
-const fs = require('fs-extra')
 const Hook = require('console-hook')
 const root = require('app-root-path')
 const replaceList = require('./replaceList')
@@ -9,11 +9,11 @@ const JSXDependencyTree = require('./JSXDependencyTree')
 
 class JsxSimpleHtmlRender {
   constructor({ throwFlag, watch, src, relativeRoot, output, replace = [] }) {
-    this.throwFlag = throwFlag
-    this.src = this.makePath(src)
-    this.relativeRoot = relativeRoot
-    this.output = this.makePath(output)
     this.replace = replace
+    this.throwFlag = throwFlag
+    this.relativeRoot = relativeRoot
+    this.src = this.makePath(src)
+    this.output = this.makePath(output)
     this.DTI = new JSXDependencyTree(this.src)
     this.exportHTML(this.DTI.tree)
 
@@ -57,13 +57,18 @@ class JsxSimpleHtmlRender {
 
   exportHTML(fileNames) {
     console.log(chalk.yellow('> export html'))
-    for (const prop in fileNames) {
-      if (fileNames.hasOwnProperty(prop)) {
-        const outputPath = this.getOutputPath(prop)
-        console.log(chalk.blue(outputPath))
-        fs.outputFileSync(outputPath, this.getHTML(prop, this.getRelativePath(outputPath)))
+    const env = process.env.NODE_ENV
+    process.env.NODE_ENV = 'development'
+    const { renderToStaticMarkup } = require('react-dom/server')
+    const errorHook = this.errorHook()
+    for (const jsxPath in fileNames) {
+      if (fileNames.hasOwnProperty(jsxPath)) {
+        const outputPath = this.getOutputPath(jsxPath)
+        fs.outputFileSync(outputPath, this.getHTML(renderToStaticMarkup, jsxPath, this.getRelativePath(outputPath)))
       }
     }
+    errorHook.detach()
+    process.env.NODE_ENV = env
   }
 
   getRelativePath(targetPath) {
@@ -87,24 +92,18 @@ class JsxSimpleHtmlRender {
     })
   }
 
-  getHTML(targetPath, relativePath) {
-    const env = process.env.NODE_ENV
-    process.env.NODE_ENV = 'development'
+  getHTML(renderToStaticMarkup, targetPath, relativePath) {
     try {
-      const ReactDOMServer = require('react-dom/server')
-      const errorHook = this.errorHook()
-      const JSX = require(targetPath)
-      const htmlMin = `<!DOCTYPE html>${ReactDOMServer.renderToStaticMarkup(JSX.default({ relativePath }))}`
-      errorHook.detach()
+      const htmlMin = renderToStaticMarkup(require(targetPath).default({ relativePath }))
+      console.log(chalk.blue(targetPath))
       return this.codeReplace(htmlMin)
     } catch (e) {
-      console.log('\n', e)
+      console.log(chalk.red(targetPath))
+      console.log(chalk.red(e))
       if (this.throwFlag) {
         throw ''
       }
       return 'Error'
-    } finally {
-      process.env.NODE_ENV = env
     }
   }
 
@@ -117,7 +116,7 @@ class JsxSimpleHtmlRender {
     return code
   }
 
-  apply(compiler) {}
+  apply() {}
 }
 
 module.exports = JsxSimpleHtmlRender

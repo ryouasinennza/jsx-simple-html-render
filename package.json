@@ -1,17 +1,21 @@
 {
   "name": "jsx-simple-html-render",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "simple html render",
   "main": "./dist/index.js",
   "scripts": {
     "dev": "rm -rf example-dist && npm run build && NODE_ENV=development webpack-cli serve",
+    "prod": "rm -rf example-dist && npm run build && NODE_ENV=production webpack-cli",
     "build": "rm -rf dist && babel src --out-dir dist",
     "prepublishOnly": "npm run build"
   },
   "keywords": [
     "webpack",
+    "plugin",
     "jsx",
-    "html"
+    "html",
+    "static",
+    "template"
   ],
   "repository": {
     "type": "git",
@@ -21,7 +25,7 @@
     "url": "https://github.com/ikedahideharu/jsx-simple-html-render/issues"
   },
   "homepage": "https://github.com/ikedahideharu/jsx-simple-html-render",
-  "author": "",
+  "author": "hideharu ikeda",
   "license": "MIT",
   "dependencies": {
     "app-root-path": "^3.0.0",
@@ -40,6 +44,7 @@
     "@babel/register": "^7.13.14",
     "@types/fs-extra": "^9.0.11",
     "babel-loader": "^8.2.2",
+    "babel-preset-minify": "^0.5.1",
     "prettier": "^2.2.1",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",

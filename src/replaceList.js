@@ -1,4 +1,5 @@
 module.exports = [
+  { regexp: /^/, value: '<!DOCTYPE html>' },
   { regexp: /&lt;/g, value: '<' },
   { regexp: /&gt;/g, value: '>' },
   { regexp: /&amp;/g, value: '&' },
