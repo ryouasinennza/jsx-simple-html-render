@@ -1,7 +1,7 @@
+const fs = require('fs-extra')
 const chalk = require('chalk')
 const cliProgress = require('cli-progress')
 const dependencyTree = require('dependency-tree')
-const fs = require('fs-extra')
 
 class JSXDependencyTree {
   constructor(JSXDirectory) {
@@ -18,7 +18,7 @@ class JSXDependencyTree {
   }
 
   setTreeAll() {
-    console.log(chalk.yellow('> Set JSX dependency tree'))
+    console.log(chalk.yellow('> set JSX dependency tree'))
     this.JSXpaths = this.getJSXFilePaths(this.JSXDirectory)
     const bar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic)
     bar.start(this.JSXpaths.length, 1)
