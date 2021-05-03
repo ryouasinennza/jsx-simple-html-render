@@ -1,1 +1,27 @@
-"use strict";var fsExtra=require("fs-extra");function getJSXFilePaths(a,b){var c=b?{}:[],d=function(e,f){f=f?"".concat(f,"/"):"";for(var g=0;g<e.length;g++)if(!!!e[g].match(/\.(js|jsx)$/)){var h=fsExtra.readdirSync("".concat(a).concat(f).concat(e[g]));d(h,"".concat(f).concat(e[g]))}else if(e[g].match(/\.jsx$/)){var i="".concat(a).concat(f).concat(e[g]);b?c["".concat(i)]=[]:c.push(i)}};return d(fsExtra.readdirSync(a),!1),c}module.exports=getJSXFilePaths;
+"use strict";
+var readdirSync = require('fs-extra').readdirSync;
+module.exports = function (root, returnObj) {
+    var files = returnObj ? {} : [];
+    var readDir = function (dirArray, prefix) {
+        prefix = prefix ? prefix + "/" : '';
+        for (var i = 0; i < dirArray.length; i++) {
+            if (!!dirArray[i].match(/\.(js|jsx)$/)) {
+                if (dirArray[i].match(/\.jsx$/)) {
+                    var path = "" + root + prefix + dirArray[i];
+                    if (returnObj) {
+                        files["" + path] = [];
+                    }
+                    else {
+                        files.push(path);
+                    }
+                }
+            }
+            else {
+                var recursionDir = readdirSync("" + root + prefix + dirArray[i]);
+                readDir(recursionDir, "" + prefix + dirArray[i]);
+            }
+        }
+    };
+    readDir(readdirSync(root), false);
+    return files;
+};

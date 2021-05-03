@@ -1,5 +1,5 @@
 const root = require('app-root-path')
-const JsxSimpleHtmlRender = require('./dist/index')
+const JsxSimpleHtmlRender = require('../dist/index')
 const isDevEnv = process.env.NODE_ENV === 'development'
 
 module.exports = {
@@ -9,10 +9,10 @@ module.exports = {
     watchContentBase: true
   },
   devtool: false,
-  entry: './example-src/js/index.js',
+  entry: './example/src/js/index.js',
   output: {
     filename: './js/example.js',
-    path: `${root}/example-dist`
+    path: `${root}/example/dist`
   },
   module: {
     rules: [
@@ -29,9 +29,9 @@ module.exports = {
     new JsxSimpleHtmlRender({
       throwFlag: !isDevEnv,
       watch: isDevEnv,
-      src: 'example-src/jsx',
-      relativeRoot: 'example-dist',
-      output: 'example-dist',
+      src: 'example/src/jsx',
+      relativeRoot: 'example/dist',
+      output: 'example/dist',
       replace: [
         {
           regexp: /<!-- replace -->/,

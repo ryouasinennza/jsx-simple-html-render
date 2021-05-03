@@ -1,8 +1,8 @@
-const fsExtra = require('fs-extra')
+const { readdirSync } = require('fs-extra')
 
-function getJSXFilePaths(root, returnObj) {
-  const files = returnObj ? {} : []
-  const readDir = (dirArray, prefix) => {
+module.exports = (root: string, returnObj: boolean) => {
+  const files: any = returnObj ? {} : []
+  const readDir = (dirArray: string[], prefix: string | boolean) => {
     prefix = prefix ? `${prefix}/` : ''
     for (let i = 0; i < dirArray.length; i++) {
       if (!!dirArray[i].match(/\.(js|jsx)$/)) {
@@ -15,14 +15,12 @@ function getJSXFilePaths(root, returnObj) {
           }
         }
       } else {
-        const recursionDir = fsExtra.readdirSync(`${root}${prefix}${dirArray[i]}`)
+        const recursionDir = readdirSync(`${root}${prefix}${dirArray[i]}`)
         readDir(recursionDir, `${prefix}${dirArray[i]}`)
       }
     }
   }
-  readDir(fsExtra.readdirSync(root), false)
+  readDir(readdirSync(root), false)
 
   return files
 }
-
-module.exports = getJSXFilePaths

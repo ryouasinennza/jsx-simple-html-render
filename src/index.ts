@@ -1,26 +1,42 @@
 require('@babel/register')
-const chalk = require('chalk')
-const fsExtra = require('fs-extra')
+const { yellow, blue, red } = require('chalk')
+const { outputFileSync } = require('fs-extra')
 const chokidar = require('chokidar')
-const Hook = require('console-hook')
 const root = require('app-root-path')
+const Hook = require('console-hook')
+const getFilePaths = require('./getJSXFilePaths')
+const jsxDependencyTree = require('./JSXDependencyTree')
 const replaceList = require('./replaceList')
-const getJSXFilePaths = require('./getJSXFilePaths')
-const JSXDependencyTree = require('./JSXDependencyTree')
+
+type Constructor = {
+  throwFlag: boolean
+  watch: boolean
+  src: string
+  relativeRoot: string
+  output: string
+  replace: string[]
+}
 
 class JsxSimpleHtmlRender {
-  constructor({ throwFlag, watch, src, relativeRoot, output, replace = [] }) {
+  private readonly replace: string[]
+  private readonly throwFlag: boolean
+  private readonly relativeRoot: string
+  private readonly src: string
+  private output: string
+  private DTI: any
+
+  constructor({ throwFlag, watch, src, relativeRoot, output, replace = [] }: Constructor) {
     this.replace = replace
     this.throwFlag = throwFlag
     this.relativeRoot = relativeRoot
     this.src = this.makePath(src)
     this.output = this.makePath(output)
     if (watch) {
-      this.DTI = new JSXDependencyTree(this.src)
+      this.DTI = new jsxDependencyTree(this.src)
       this.exportHTML(this.DTI.tree)
       this.watch()
     } else {
-      this.exportHTML(getJSXFilePaths(this.src, true))
+      this.exportHTML(getFilePaths(this.src, true))
     }
   }
 
@@ -29,19 +45,19 @@ class JsxSimpleHtmlRender {
       persistent: true
     })
     watcher.on('ready', () => {
-      watcher.on('change', (path) => {
+      watcher.on('change', (path: string) => {
         this.exportHTML(this.DTI.findDependencyFiles(path))
       })
-      watcher.on('add', (path) => {
+      watcher.on('add', (path: string) => {
         this.exportHTML(this.DTI.setTree(path))
       })
-      watcher.on('unlink', (path) => {
+      watcher.on('unlink', (path: string) => {
         this.DTI.removeDependency(path)
       })
     })
   }
 
-  makePath(path) {
+  makePath(path: string) {
     let replacePath = path
     if (replacePath.match(/\/$/)) {
       replacePath = replacePath.replace(/\/$/, '')
@@ -53,12 +69,12 @@ class JsxSimpleHtmlRender {
     return `${root}/${replacePath}/`
   }
 
-  getOutputPath(target) {
+  getOutputPath(target: string) {
     return target.replace(this.src, this.output).replace(/\.jsx/, '.html')
   }
 
-  exportHTML(fileNames) {
-    console.log(chalk.yellow('> export html'))
+  exportHTML(fileNames: object) {
+    console.log(yellow('> export html'))
     const env = process.env.NODE_ENV
     process.env.NODE_ENV = 'development'
     const { renderToStaticMarkup } = require('react-dom/server')
@@ -66,17 +82,14 @@ class JsxSimpleHtmlRender {
     for (const jsxPath in fileNames) {
       if (fileNames.hasOwnProperty(jsxPath)) {
         const outputPath = this.getOutputPath(jsxPath)
-        fsExtra.outputFileSync(
-          outputPath,
-          this.getHTML(renderToStaticMarkup, jsxPath, this.getRelativePath(outputPath))
-        )
+        outputFileSync(outputPath, this.getHTML(renderToStaticMarkup, jsxPath, this.getRelativePath(outputPath)))
       }
     }
     errorHook.detach()
     process.env.NODE_ENV = env
   }
 
-  getRelativePath(targetPath) {
+  getRelativePath(targetPath: string) {
     const pathArray = targetPath.split('/')
     const pathLength = pathArray.length - pathArray.indexOf(this.relativeRoot) - 1
     let relativePath = ''
@@ -88,7 +101,7 @@ class JsxSimpleHtmlRender {
   }
 
   errorHook() {
-    return Hook().attach((method, args) => {
+    return Hook().attach((method: string, args: string) => {
       if (method.match(/(error|wran)/)) {
         throw `${Object.entries(args)
           .map(([, value]) => value)
@@ -97,14 +110,14 @@ class JsxSimpleHtmlRender {
     })
   }
 
-  getHTML(renderToStaticMarkup, targetPath, relativePath) {
+  getHTML(renderToStaticMarkup: any, targetPath: string, relativePath: string) {
     try {
       const htmlMin = renderToStaticMarkup(require(targetPath).default({ relativePath }))
-      console.log(chalk.blue(targetPath))
+      console.log(blue(targetPath))
       return this.codeReplace(htmlMin)
     } catch (e) {
-      console.log(chalk.red(targetPath))
-      console.log(chalk.red(e))
+      console.log(red(targetPath))
+      console.log(red(e))
       if (this.throwFlag) {
         throw ''
       }
@@ -112,7 +125,7 @@ class JsxSimpleHtmlRender {
     }
   }
 
-  codeReplace(htmlCode) {
+  codeReplace(htmlCode: string) {
     let code = htmlCode
     const replace = this.replace.length === 0 ? replaceList : [...replaceList, ...this.replace]
     for (let i = 0; i < replace.length; i++) {

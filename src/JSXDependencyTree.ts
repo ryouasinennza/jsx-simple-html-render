@@ -4,13 +4,18 @@ const dependencyTree = require('dependency-tree')
 const getJSXFilePaths = require('./getJSXFilePaths')
 
 class JSXDependencyTree {
-  constructor(JSXDirectory) {
+  private readonly tree: {
+    [key: string]: string[]
+  }
+  private readonly JSXDirectory: string
+
+  constructor(JSXDirectory: string) {
     this.tree = {}
     this.JSXDirectory = JSXDirectory
     this.setTreeAll()
   }
 
-  setTree(targetPath) {
+  setTree(targetPath: string) {
     if (targetPath.match(/\.jsx$/) && !this.tree[targetPath]) {
       this.tree[targetPath] = this.getDependencyTree(targetPath)
       return { [targetPath]: [] }
@@ -29,19 +34,19 @@ class JSXDependencyTree {
     bar.stop()
   }
 
-  getDependencyTree(filename) {
+  getDependencyTree(filename: string) {
     return dependencyTree.toList({
       filename: filename,
       directory: this.JSXDirectory,
       nodeModulesConfig: {
         entry: 'module'
       },
-      filter: (path) => path.indexOf('node_modules') === -1,
+      filter: (path: string) => path.indexOf('node_modules') === -1,
       nonExistent: []
     })
   }
 
-  findDependencyFiles(targetPath) {
+  findDependencyFiles(targetPath: string) {
     if (targetPath.match(/\.jsx$/)) {
       if (this.tree[targetPath]) {
         this.clearRequireCache(targetPath)
@@ -54,7 +59,7 @@ class JSXDependencyTree {
       let JSXPaths = {}
       for (const propJSXPath in this.tree) {
         if (this.tree.hasOwnProperty(propJSXPath)) {
-          if (this.tree[propJSXPath].some((childrenPath) => childrenPath === targetPath)) {
+          if (this.tree[propJSXPath].some((childrenPath: string) => childrenPath === targetPath)) {
             this.clearRequireCache(propJSXPath)
             JSXPaths = {
               ...JSXPaths,
@@ -67,14 +72,14 @@ class JSXDependencyTree {
     }
   }
 
-  clearRequireCache(JSXPath) {
+  clearRequireCache(JSXPath: string) {
     delete require.cache[JSXPath]
     for (let i = 0; i < this.tree[JSXPath].length; i++) {
       delete require.cache[this.tree[JSXPath][i]]
     }
   }
 
-  removeDependency(targetPath) {
+  removeDependency(targetPath: string) {
     if (targetPath.match(/\.jsx$/)) {
       delete this.tree[targetPath]
     }

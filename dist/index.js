@@ -1,1 +1,127 @@
-"use strict";function _toConsumableArray(a){return _arrayWithoutHoles(a)||_iterableToArray(a)||_unsupportedIterableToArray(a)||_nonIterableSpread()}function _nonIterableSpread(){throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.")}function _iterableToArray(a){if("undefined"!=typeof Symbol&&Symbol.iterator in Object(a))return Array.from(a)}function _arrayWithoutHoles(a){if(Array.isArray(a))return _arrayLikeToArray(a)}function _slicedToArray(a,b){return _arrayWithHoles(a)||_iterableToArrayLimit(a,b)||_unsupportedIterableToArray(a,b)||_nonIterableRest()}function _nonIterableRest(){throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.")}function _unsupportedIterableToArray(a,b){if(a){if("string"==typeof a)return _arrayLikeToArray(a,b);var c=Object.prototype.toString.call(a).slice(8,-1);return"Object"===c&&a.constructor&&(c=a.constructor.name),"Map"===c||"Set"===c?Array.from(a):"Arguments"===c||/^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(c)?_arrayLikeToArray(a,b):void 0}}function _arrayLikeToArray(a,b){(null==b||b>a.length)&&(b=a.length);for(var c=0,d=Array(b);c<b;c++)d[c]=a[c];return d}function _iterableToArrayLimit(a,b){if("undefined"!=typeof Symbol&&Symbol.iterator in Object(a)){var c=[],d=!0,e=!1,f=void 0;try{for(var g,h=a[Symbol.iterator]();!(d=(g=h.next()).done)&&(c.push(g.value),!(b&&c.length===b));d=!0);}catch(a){e=!0,f=a}finally{try{d||null==h["return"]||h["return"]()}finally{if(e)throw f}}return c}}function _arrayWithHoles(a){if(Array.isArray(a))return a}function _classCallCheck(a,b){if(!(a instanceof b))throw new TypeError("Cannot call a class as a function")}function _defineProperties(a,b){for(var c,d=0;d<b.length;d++)c=b[d],c.enumerable=c.enumerable||!1,c.configurable=!0,"value"in c&&(c.writable=!0),Object.defineProperty(a,c.key,c)}function _createClass(a,b,c){return b&&_defineProperties(a.prototype,b),c&&_defineProperties(a,c),a}require("@babel/register");var chalk=require("chalk"),fsExtra=require("fs-extra"),chokidar=require("chokidar"),Hook=require("console-hook"),root=require("app-root-path"),replaceList=require("./replaceList"),getJSXFilePaths=require("./getJSXFilePaths"),JSXDependencyTree=require("./JSXDependencyTree"),JsxSimpleHtmlRender=/*#__PURE__*/function(){function a(b){var c=b.throwFlag,d=b.watch,e=b.src,f=b.relativeRoot,g=b.output,h=b.replace,i=void 0===h?[]:h;_classCallCheck(this,a),this.replace=i,this.throwFlag=c,this.relativeRoot=f,this.src=this.makePath(e),this.output=this.makePath(g),d?(this.DTI=new JSXDependencyTree(this.src),this.exportHTML(this.DTI.tree),this.watch()):this.exportHTML(getJSXFilePaths(this.src,!0))}return _createClass(a,[{key:"watch",value:function watch(){var a=this,b=chokidar.watch(this.src,{persistent:!0});b.on("ready",function(){b.on("change",function(b){a.exportHTML(a.DTI.findDependencyFiles(b))}),b.on("add",function(b){a.exportHTML(a.DTI.setTree(b))}),b.on("unlink",function(b){a.DTI.removeDependency(b)})})}},{key:"makePath",value:function makePath(a){var b=a;return b.match(/\/$/)&&(b=b.replace(/\/$/,"")),b.match(/^\//)&&(b=b.replace(/^\//,"")),"".concat(root,"/").concat(b,"/")}},{key:"getOutputPath",value:function getOutputPath(a){return a.replace(this.src,this.output).replace(/\.jsx/,".html")}},{key:"exportHTML",value:function exportHTML(a){console.log(chalk.yellow("> export html"));var b=process.env.NODE_ENV;process.env.NODE_ENV="development";var c=require("react-dom/server"),d=c.renderToStaticMarkup,e=this.errorHook();for(var f in a)if(a.hasOwnProperty(f)){var g=this.getOutputPath(f);fsExtra.outputFileSync(g,this.getHTML(d,f,this.getRelativePath(g)))}e.detach(),process.env.NODE_ENV=b}},{key:"getRelativePath",value:function getRelativePath(a){var b=a.split("/"),c=b.length-b.indexOf(this.relativeRoot)-1,d="";if(1===c)return d;for(var e=1;e<c;e++)d="".concat(d,"../");return d}},{key:"errorHook",value:function errorHook(){return Hook().attach(function(a,b){if(a.match(/(error|wran)/))throw"".concat(Object.entries(b).map(function(a){var b=_slicedToArray(a,2),c=b[1];return c}).join())})}},{key:"getHTML",value:function getHTML(a,b,c){try{var d=a(require(b)["default"]({relativePath:c}));return console.log(chalk.blue(b)),this.codeReplace(d)}catch(a){if(console.log(chalk.red(b)),console.log(chalk.red(a)),this.throwFlag)throw"";return"Error"}}},{key:"codeReplace",value:function codeReplace(a){for(var b=a,c=0===this.replace.length?replaceList:[].concat(_toConsumableArray(replaceList),_toConsumableArray(this.replace)),d=0;d<c.length;d++)b=b.replace(c[d].regexp,c[d].value);return b}},{key:"apply",value:function apply(){}}]),a}();module.exports=JsxSimpleHtmlRender;
+"use strict";
+var __spreadArray = (this && this.__spreadArray) || function (to, from) {
+    for (var i = 0, il = from.length, j = to.length; i < il; i++, j++)
+        to[j] = from[i];
+    return to;
+};
+require('@babel/register');
+var _a = require('chalk'), yellow = _a.yellow, blue = _a.blue, red = _a.red;
+var outputFileSync = require('fs-extra').outputFileSync;
+var chokidar = require('chokidar');
+var root = require('app-root-path');
+var Hook = require('console-hook');
+var getFilePaths = require('./getJSXFilePaths');
+var jsxDependencyTree = require('./JSXDependencyTree');
+var replaceList = require('./replaceList');
+var JsxSimpleHtmlRender = /** @class */ (function () {
+    function JsxSimpleHtmlRender(_a) {
+        var throwFlag = _a.throwFlag, watch = _a.watch, src = _a.src, relativeRoot = _a.relativeRoot, output = _a.output, _b = _a.replace, replace = _b === void 0 ? [] : _b;
+        this.replace = replace;
+        this.throwFlag = throwFlag;
+        this.relativeRoot = relativeRoot;
+        this.src = this.makePath(src);
+        this.output = this.makePath(output);
+        if (watch) {
+            this.DTI = new jsxDependencyTree(this.src);
+            this.exportHTML(this.DTI.tree);
+            this.watch();
+        }
+        else {
+            this.exportHTML(getFilePaths(this.src, true));
+        }
+    }
+    JsxSimpleHtmlRender.prototype.watch = function () {
+        var _this = this;
+        var watcher = chokidar.watch(this.src, {
+            persistent: true
+        });
+        watcher.on('ready', function () {
+            watcher.on('change', function (path) {
+                _this.exportHTML(_this.DTI.findDependencyFiles(path));
+            });
+            watcher.on('add', function (path) {
+                _this.exportHTML(_this.DTI.setTree(path));
+            });
+            watcher.on('unlink', function (path) {
+                _this.DTI.removeDependency(path);
+            });
+        });
+    };
+    JsxSimpleHtmlRender.prototype.makePath = function (path) {
+        var replacePath = path;
+        if (replacePath.match(/\/$/)) {
+            replacePath = replacePath.replace(/\/$/, '');
+        }
+        if (replacePath.match(/^\//)) {
+            replacePath = replacePath.replace(/^\//, '');
+        }
+        return root + "/" + replacePath + "/";
+    };
+    JsxSimpleHtmlRender.prototype.getOutputPath = function (target) {
+        return target.replace(this.src, this.output).replace(/\.jsx/, '.html');
+    };
+    JsxSimpleHtmlRender.prototype.exportHTML = function (fileNames) {
+        console.log(yellow('> export html'));
+        var env = process.env.NODE_ENV;
+        process.env.NODE_ENV = 'development';
+        var renderToStaticMarkup = require('react-dom/server').renderToStaticMarkup;
+        var errorHook = this.errorHook();
+        for (var jsxPath in fileNames) {
+            if (fileNames.hasOwnProperty(jsxPath)) {
+                var outputPath = this.getOutputPath(jsxPath);
+                outputFileSync(outputPath, this.getHTML(renderToStaticMarkup, jsxPath, this.getRelativePath(outputPath)));
+            }
+        }
+        errorHook.detach();
+        process.env.NODE_ENV = env;
+    };
+    JsxSimpleHtmlRender.prototype.getRelativePath = function (targetPath) {
+        var pathArray = targetPath.split('/');
+        var pathLength = pathArray.length - pathArray.indexOf(this.relativeRoot) - 1;
+        var relativePath = '';
+        if (pathLength === 1)
+            return relativePath;
+        for (var i = 1; i < pathLength; i++) {
+            relativePath = relativePath + "../";
+        }
+        return relativePath;
+    };
+    JsxSimpleHtmlRender.prototype.errorHook = function () {
+        return Hook().attach(function (method, args) {
+            if (method.match(/(error|wran)/)) {
+                throw "" + Object.entries(args)
+                    .map(function (_a) {
+                    var value = _a[1];
+                    return value;
+                })
+                    .join();
+            }
+        });
+    };
+    JsxSimpleHtmlRender.prototype.getHTML = function (renderToStaticMarkup, targetPath, relativePath) {
+        try {
+            var htmlMin = renderToStaticMarkup(require(targetPath).default({ relativePath: relativePath }));
+            console.log(blue(targetPath));
+            return this.codeReplace(htmlMin);
+        }
+        catch (e) {
+            console.log(red(targetPath));
+            console.log(red(e));
+            if (this.throwFlag) {
+                throw '';
+            }
+            return 'Error';
+        }
+    };
+    JsxSimpleHtmlRender.prototype.codeReplace = function (htmlCode) {
+        var code = htmlCode;
+        var replace = this.replace.length === 0 ? replaceList : __spreadArray(__spreadArray([], replaceList), this.replace);
+        for (var i = 0; i < replace.length; i++) {
+            code = code.replace(replace[i].regexp, replace[i].value);
+        }
+        return code;
+    };
+    JsxSimpleHtmlRender.prototype.apply = function () { };
+    return JsxSimpleHtmlRender;
+}());
+module.exports = JsxSimpleHtmlRender;
