@@ -21,6 +21,7 @@
     "webpack-dev-server": "^3.11.2"
   },
   "devDependencies": {
+    "@babel/register": "^7.13.16",
     "jsx-simple-html-render": "^1.0.5"
   }
 }
