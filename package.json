@@ -1,12 +1,10 @@
 {
   "name": "jsx-simple-html-render",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "simple html render",
-  "main": "./dist/index.js",
+  "main": "./dist/main.js",
   "scripts": {
-    "dev": "rm -rf example/dist && npm run build && NODE_ENV=development webpack-cli serve --config example/webpack.example.config.js",
-    "prod": "rm -rf example/dist && npm run build && NODE_ENV=production webpack-cli --config example/webpack.example.config.js",
-    "build": "tsc",
+    "build": "rm -rf dist && tsc && node uglifyjs.js",
     "prepublishOnly": "npm run build"
   },
   "keywords": [
@@ -37,6 +35,8 @@
     "fs-extra": "^9.1.0"
   },
   "devDependencies": {
+    "fs-readdir-recursive": "^1.1.0",
+    "uglify-js": "^3.13.5",
     "@babel/cli": "^7.13.14",
     "@babel/core": "^7.13.15",
     "@babel/preset-env": "^7.13.15",

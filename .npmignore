@@ -1,8 +1,10 @@
-example-dist/
-example-src/
+example
 src/
+.gitignore
 .babelrc
 .node-version
 .npmignore
 .prettierrc.json
 webpack.config.js
+tsconfig.json
+uglifyjs.js

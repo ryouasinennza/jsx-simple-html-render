@@ -1,12 +1,17 @@
+import { isArray } from 'util'
+
 require('@babel/register')
-const { yellow, blue, red } = require('chalk')
-const { outputFileSync } = require('fs-extra')
-const chokidar = require('chokidar')
-const root = require('app-root-path')
-const Hook = require('console-hook')
-const getFilePaths = require('./getJSXFilePaths')
-const jsxDependencyTree = require('./JSXDependencyTree')
-const replaceList = require('./replaceList')
+import chokidar from 'chokidar'
+import { outputFileSync } from 'fs-extra'
+import { replaceList } from './replaceList'
+import { ReplaceList, TreeObject } from './@types/types'
+import { JSXDependencyTree } from './JSXDependencyTree'
+import { log, errorHook, makeFullPath, replaceLoop, getJSXFilePaths } from './utility'
+
+const env = process.env.NODE_ENV
+process.env.NODE_ENV = 'development'
+const { renderToStaticMarkup } = require('react-dom/server')
+process.env.NODE_ENV = env
 
 type Constructor = {
   throwFlag: boolean
@@ -14,11 +19,11 @@ type Constructor = {
   src: string
   relativeRoot: string
   output: string
-  replace: string[]
+  replace: ReplaceList
 }
 
 class JsxSimpleHtmlRender {
-  private readonly replace: string[]
+  private readonly replace: ReplaceList
   private readonly throwFlag: boolean
   private readonly relativeRoot: string
   private readonly src: string
@@ -29,18 +34,18 @@ class JsxSimpleHtmlRender {
     this.replace = replace
     this.throwFlag = throwFlag
     this.relativeRoot = relativeRoot
-    this.src = this.makePath(src)
-    this.output = this.makePath(output)
+    this.src = makeFullPath(src)
+    this.output = makeFullPath(output)
     if (watch) {
-      this.DTI = new jsxDependencyTree(this.src)
+      this.DTI = new JSXDependencyTree(this.src)
       this.exportHTML(this.DTI.tree)
       this.watch()
     } else {
-      this.exportHTML(getFilePaths(this.src, true))
+      this.exportHTML(getJSXFilePaths<TreeObject>(this.src, true))
     }
   }
 
-  watch() {
+  watch(): void {
     const watcher = chokidar.watch(this.src, {
       persistent: true
     })
@@ -57,39 +62,26 @@ class JsxSimpleHtmlRender {
     })
   }
 
-  makePath(path: string) {
-    let replacePath = path
-    if (replacePath.match(/\/$/)) {
-      replacePath = replacePath.replace(/\/$/, '')
-    }
-
-    if (replacePath.match(/^\//)) {
-      replacePath = replacePath.replace(/^\//, '')
-    }
-    return `${root}/${replacePath}/`
-  }
-
   getOutputPath(target: string) {
     return target.replace(this.src, this.output).replace(/\.jsx/, '.html')
   }
 
-  exportHTML(fileNames: object) {
-    console.log(yellow('> export html'))
+  exportHTML(fileNames: TreeObject): void {
+    log.y('> export html')
     const env = process.env.NODE_ENV
     process.env.NODE_ENV = 'development'
-    const { renderToStaticMarkup } = require('react-dom/server')
-    const errorHook = this.errorHook()
+    const hook = errorHook()
     for (const jsxPath in fileNames) {
       if (fileNames.hasOwnProperty(jsxPath)) {
         const outputPath = this.getOutputPath(jsxPath)
         outputFileSync(outputPath, this.getHTML(renderToStaticMarkup, jsxPath, this.getRelativePath(outputPath)))
       }
     }
-    errorHook.detach()
+    hook.detach()
     process.env.NODE_ENV = env
   }
 
-  getRelativePath(targetPath: string) {
+  getRelativePath(targetPath: string): string {
     const pathArray = targetPath.split('/')
     const pathLength = pathArray.length - pathArray.indexOf(this.relativeRoot) - 1
     let relativePath = ''
@@ -100,24 +92,14 @@ class JsxSimpleHtmlRender {
     return relativePath
   }
 
-  errorHook() {
-    return Hook().attach((method: string, args: string) => {
-      if (method.match(/(error|wran)/)) {
-        throw `${Object.entries(args)
-          .map(([, value]) => value)
-          .join()}`
-      }
-    })
-  }
-
-  getHTML(renderToStaticMarkup: any, targetPath: string, relativePath: string) {
+  getHTML(renderToStaticMarkup: any, targetPath: string, relativePath: string): string {
     try {
-      const htmlMin = renderToStaticMarkup(require(targetPath).default({ relativePath }))
-      console.log(blue(targetPath))
-      return this.codeReplace(htmlMin)
+      const html = this.codeReplace(renderToStaticMarkup(require(targetPath).default({ relativePath })))
+      log.b(targetPath)
+      return html
     } catch (e) {
-      console.log(red(targetPath))
-      console.log(red(e))
+      log.r(targetPath)
+      log.r(e)
       if (this.throwFlag) {
         throw ''
       }
@@ -125,13 +107,8 @@ class JsxSimpleHtmlRender {
     }
   }
 
-  codeReplace(htmlCode: string) {
-    let code = htmlCode
-    const replace = this.replace.length === 0 ? replaceList : [...replaceList, ...this.replace]
-    for (let i = 0; i < replace.length; i++) {
-      code = code.replace(replace[i].regexp, replace[i].value)
-    }
-    return code
+  codeReplace(htmlCode: string): string {
+    return replaceLoop(htmlCode, this.replace.length === 0 ? replaceList : [...replaceList, ...this.replace])
   }
 
   apply() {}
