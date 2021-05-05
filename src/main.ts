@@ -1,5 +1,3 @@
-import { isArray } from 'util'
-
 require('@babel/register')
 import chokidar from 'chokidar'
 import { outputFileSync } from 'fs-extra'
