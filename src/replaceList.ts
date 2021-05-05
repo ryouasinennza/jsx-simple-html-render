@@ -1,4 +1,6 @@
-module.exports = [
+import { ReplaceList } from './@types/types'
+
+export const replaceList: ReplaceList = [
   { regexp: /^/, value: '<!DOCTYPE html>' },
   { regexp: /&lt;/g, value: '<' },
   { regexp: /&gt;/g, value: '>' },

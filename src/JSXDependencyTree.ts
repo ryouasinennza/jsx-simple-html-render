@@ -1,25 +1,29 @@
-const chalk = require('chalk')
-const cliProgress = require('cli-progress')
-const dependencyTree = require('dependency-tree')
-const getJSXFilePaths = require('./getJSXFilePaths')
+import cliProgress from 'cli-progress'
+import dependencyTree from 'dependency-tree'
+import { TreeObject } from './@types/types'
+import { log, getJSXFilePaths } from './utility'
 
-class JSXDependencyTree {
-  constructor(JSXDirectory) {
+export class JSXDependencyTree {
+  private readonly tree: TreeObject
+  private readonly JSXDirectory: string
+
+  constructor(JSXDirectory: string) {
     this.tree = {}
     this.JSXDirectory = JSXDirectory
     this.setTreeAll()
   }
 
-  setTree(targetPath) {
+  setTree(targetPath: string): TreeObject | null {
     if (targetPath.match(/\.jsx$/) && !this.tree[targetPath]) {
       this.tree[targetPath] = this.getDependencyTree(targetPath)
       return { [targetPath]: [] }
     }
+    return null
   }
 
-  setTreeAll() {
-    console.log(chalk.yellow('> set JSX dependency tree'))
-    const JSXPaths = getJSXFilePaths(this.JSXDirectory, false)
+  setTreeAll(): void {
+    log.y('> set JSX dependency tree')
+    const JSXPaths = getJSXFilePaths<string[]>(this.JSXDirectory, false)
     const bar = new cliProgress.SingleBar({}, cliProgress.Presets.shades_classic)
     bar.start(JSXPaths.length, 1)
     for (let i = 0; i < JSXPaths.length; i++) {
@@ -29,19 +33,19 @@ class JSXDependencyTree {
     bar.stop()
   }
 
-  getDependencyTree(filename) {
+  getDependencyTree(filename: string): string[] {
     return dependencyTree.toList({
       filename: filename,
       directory: this.JSXDirectory,
       nodeModulesConfig: {
         entry: 'module'
       },
-      filter: (path) => path.indexOf('node_modules') === -1,
+      filter: (path: string) => path.indexOf('node_modules') === -1,
       nonExistent: []
     })
   }
 
-  findDependencyFiles(targetPath) {
+  findDependencyFiles(targetPath: string): TreeObject {
     if (targetPath.match(/\.jsx$/)) {
       if (this.tree[targetPath]) {
         this.clearRequireCache(targetPath)
@@ -54,7 +58,7 @@ class JSXDependencyTree {
       let JSXPaths = {}
       for (const propJSXPath in this.tree) {
         if (this.tree.hasOwnProperty(propJSXPath)) {
-          if (this.tree[propJSXPath].some((childrenPath) => childrenPath === targetPath)) {
+          if (this.tree[propJSXPath].some((childrenPath: string) => childrenPath === targetPath)) {
             this.clearRequireCache(propJSXPath)
             JSXPaths = {
               ...JSXPaths,
@@ -67,18 +71,16 @@ class JSXDependencyTree {
     }
   }
 
-  clearRequireCache(JSXPath) {
+  clearRequireCache(JSXPath: string): void {
     delete require.cache[JSXPath]
     for (let i = 0; i < this.tree[JSXPath].length; i++) {
       delete require.cache[this.tree[JSXPath][i]]
     }
   }
 
-  removeDependency(targetPath) {
+  removeDependency(targetPath: string): void {
     if (targetPath.match(/\.jsx$/)) {
       delete this.tree[targetPath]
     }
   }
 }
-
-module.exports = JSXDependencyTree

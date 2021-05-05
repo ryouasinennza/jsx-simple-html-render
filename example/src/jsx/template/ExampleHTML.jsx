@@ -12,7 +12,7 @@ export default ({ relativePath }) => {
         <Remove />
         {'<!-- replace -->'}
         {'<!-- comment out -->'}
-        <div htmlonclick="console.log('click')">clicasss</div>
+        <div htmlonclick="console.log('click')">example</div>
         <script src={`${relativePath}js/example.js`} />
       </body>
     </html>
