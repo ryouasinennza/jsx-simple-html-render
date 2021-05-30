@@ -1,6 +1,12 @@
 # jsx-simple-html-render
 Webpack plugin that simply outputs HTML files using JSX
 
+This is used by markup engineers for HTML delivery
+
+There are still companies that are doing this kind of development, and I hope you can get in touch with JSX as much as possible.
+
+I hope we can have a world where we don't need such a library.
+
 ## Getting Started
 **Please install react environment and** `@babel/register` **to use**
 
